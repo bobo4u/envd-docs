@@ -72,7 +72,7 @@ const members = [
     title: 'Oener',
     links: [
       { icon: 'github', link: 'https://github.com/bobo4u'},
-      { icon: 'twitter', link: 'https://twitter.com/TensorChord' }
+      { icon: 'blog', link: 'http://39.106.91.62:888/' }
     ]
   },
 ]
