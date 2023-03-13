@@ -23,6 +23,8 @@ pnpm i
 pnpm dev
 # dev zh-CN docs
 pnpm dev:zh
+# 阿里云主机并暴露5173端口供web访问
+pnpm dev:zh --host 172.25.16.119
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
