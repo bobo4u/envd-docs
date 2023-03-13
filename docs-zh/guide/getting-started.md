@@ -1,239 +1,30 @@
 # 快速开始
 
-## envd 是什么？
+## `HypreDL` 是什么？
 
-envd（`ɪnˈvdɪ`）是一个命令行工具，可以帮助你为 AI/ML 创建基于容器的开发环境。
+深度学习计算服务平台（以下简称：HyperDL）是中科弘云面向有定制化AI需求的行业用户，推出的AI开发平台，提供从样本标注、模型训练、模型部署的一站式AI开发能力，帮助用户快速训练和部署模型，管理全周期AI工作流。
 
-开发环境通常包括了 Python，系统依赖，CUDA，BASH 脚本，Dockerfiles，SSH 配置，Kubernetes YAMLs，以及许多其他冗长的设置。在长年累月的开发中，系统里的东西总会越来越多，改动无法追踪，最终导致错误。envd 就是要解决这样的问题。
+AI开发平台以MLOps（机器学习运维）为核心，利用容器等云原生技术的优势，让用户可以更快速、方便地部署、使用和管理当前最流行的机器学习技术和软件。同时提供了更敏捷高质量的应用交付以及更简单和高效的应用管理，并且提供更快速的业务需求响应，提供更优质的用户体验。
 
-1. 在 `build.envd` 中声明需要的软件依赖（CUDA、Python 包、你最喜欢的 IDE 等）。
-2. 在命令行里运行 `envd up` 。
-3. 在独立且隔离的环境中开发。
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/5100735/189058399-3865a039-9459-4e74-83dd-3ee2ecadfef5.svg" width="75%"/>
-</p>
+## 为什么使用 `HyperDL` ？
 
-## 为什么使用 `envd` ？
+随着人工智能技术的快速发展和逐渐成熟，智能算法已经深度融入各行业业务应用，极大提升了业务应用的效率和实战效果。传统上，人工智能（或深度学习）开发流程极为冗长，基础设施的开发、搭建、调试往往要耗费数月时间，期间透明性低，测试频繁，效率低下，严重限制人工智能技术在行业中的应用。
 
-使用 `envd` 构建的环境提供了以下开箱即用的功能。
+人工智能技术在消费互联网领域发展速度较快，并加速与核心业务进行整合。当前，智能技术正在向更多的行业领域渗透，融合渗透仍需时日孕育。相较于消费互联网领域，传统行业的知识获取和积累需要较长时间，应用场景碎片化的特点导致低成本、易用、泛化能力较强的能力平台构建需较长周期。
 
-❤️ **团队的知识积累**。
+在人工智能技术中由于各种深度学习框架和算法层出不穷，从模型训练、服务推理到边缘部署，整个人工智能开发流程复杂，加上各阶段不同的学习框架支持，需要算法开发人员能力要求太高；同时由于GPU、NPU等专业计算卡资源稀缺等多种因素，行业用户急需拥有一套标准化、支持异构化资源调度的人工智能开发平台完成整个任务的调度与模型开发工作。
 
-`envd` 构建函数可以被重用。使用 `include` 函数来导入任何 git 仓库中的 envd 函数。复用不再需要复制粘贴 Dockerfile 中的命令，可以直接复用已有函数。
+## 传统的模型开发存在的问题 ？
 
-```python
-envdlib = include("https://github.com/tensorchord/envdlib")
+AI算法构建整体流程复杂，需AI科学家，算法工程师等专业人员参与，且涉及各类人员协作，效率极低，由于各行各业对于人工智能的细节需求各不相同，但又不相冲突，面对井喷式AI需求，每一种应用场景都需要当作不同算法进行重复设计和开发，这就需要一个“通用版本”人工智能平台，既可以实现一些通用的管理等能力，又可以根据用户行业的不同进行自定义及个性化配置，来满足各行各业对于AI能力的需求。
 
-def build():
-    base(os="ubuntu20.04", language="python")
-    envdlib.tensorboard(8888)
-```
+人工智能训练需要大量数据的支撑，而在有些业务场景下由于数据的敏感性、保密性、安全性，无法通过外部购买、采集等方式获取，因此内部样本数据的管理与使用就显得尤为重要。一方面为人工智能算法训练提供强大的数据支撑，另一方面可以形成宝贵的数据及模型资产，创造更大的价值。
 
-::: details `envdlib.tensorboard` 来自 [github.com/tensorchord/envdlib](https://github.com/tensorchord/envdlib/blob/main/src/monitoring.envd)
+> 长久以来，人工智能训练过程和推理过程相互割裂，训练模型由于没有实际场景的业务数据反哺，导致模型场景泛化性不足，算法精度“上线即巅峰”，难以满足业务变化场景的实战需求；云端数据中心和边缘端移动智能设备之间缺乏联动，无法及时进行模型更新以及设备状态监控，能以形成从中心到边缘“云边协同”的体系能力，难以发挥复杂场景指挥、响应、更新、执行的效果。
 
-```python
-def tensorboard(envd_port=6006, envd_dir="/home/envd/logs",
-        host_port=0, host_dir="/var/log/tensorboard"):
-    """Configure TensorBoard.
+**1种开发算法 * N种场景 = N种模型定制**，传统的小作坊烟囱式模型开发过程带来的痛点：
 
-    Make sure you have permission for `host_dir`
-
-    Args:
-        envd_port (Optional[int]): port used by envd container
-        envd_dir (Optional[str]): log storage mount path in the envd container
-        host_port (Optional[int]): port used by the host, if not specified or equals to 0,
-            envd will randomly choose a free port
-        host_dir (Optional[str]): log storage mount path in the host
-    """
-    install.python_packages(["tensorboard"])
-    runtime.mount(host_path=host_dir, envd_path=envd_dir)
-    runtime.daemon(
-        commands=[
-            [
-                "tensorboard",
-                "--logdir",
-                "/home/envd/logs",
-                "--port",
-                str(envd_port),
-                "--host",
-                "0.0.0.0",
-                ">>tensorboard.log",
-                "2>&1",
-            ],
-        ]
-    )
-    runtime.expose(envd_port=envd_port, host_port=host_port, service="tensorboard")
-
-```
-
-:::
-
-⏱️ **BuildKit 原生，构建速度提高 6 倍**
-
-[BuildKit](https://github.com/moby/buildkit) 支持并行构建和构建时的软件缓存（例如 pip 和 apt 缓存）。你可以在不用了解细节的情况下享受到它的强大之处。
-
-例如，PyPI 缓存是在不同的构建过程中可以被被共享。因此如果软件包以前被下载过，就会直接利用缓存安装。
-
-<p align=center>
-  <img src="https://user-images.githubusercontent.com/5100735/189928628-543f4851-87b7-462b-b811-372cbf46ff25.svg" width="65%"/>
-</p>
-
-## 三分钟建立你的 envd 环境
-
-### 安装要求
-
-- Docker (20.10.0 or above)
-
-### 安装和初始化 `envd`
-
-::: code-group
-
-```bash [pip]
-# envd 也可以用 pip 来安装。
-
-pip3 install --upgrade envd
-```
-
-```bash [Homebrew]
-# 如果你使用的是 MacOS，可以通过 homebrew 来安装 envd。
-
-brew install envd
-```
-
-```bash [Pipx]
-# envd 也可以通过 pipx 安装。
-
-pipx install envd
-```
-
-```bash [安装脚本]
-# 在终端中运行以下命令即可安装最新版本的 envd：
-
-curl -sSfL https://envd.tensorchord.ai/install.sh | sudo bash
-```
-
-:::
-
-安装完成后，请运行 `envd bootstrap` 来初始化。
-
-```bash
-envd bootstrap
-```
-
-::: tip
-
-你可以在运行 `envd bootstrap` 时添加 `--dockerhub-mirror`或`-m`选项，来设置 docker.io 仓库的镜像。
-
-```bash
-envd bootstrap --dockerhub-mirror https://docker.mirrors.sjtug.sjtu.edu.cn
-```
-
-:::
-
-### 创建一个 `envd` 环境
-
-先克隆仓库[`envd-quick-start`](https://github.com/tensorchord/envd-quick-start):
-
-```
-git clone https://github.com/tensorchord/envd-quick-start.git
-```
-
-声明文件 `build.envd` 是这样的：
-
-```python title=build.envd
-def build():
-    config.repo(url="https://github.com/tensorchord/envd", description="envd quick start example")
-    base(os="ubuntu20.04", language="python3")
-    # Configure pip index if needed.
-    # config.pip_index(url = "https://pypi.tuna.tsinghua.edu.cn/simple")
-    install.python_packages(name = [
-        "numpy",
-    ])
-    shell("zsh")
-```
-
-:::tip
-我们在这里使用 Python 作为例子，除此之外，`envd` 也支持其他语言，如 R 和 Julia，参见[这里](https://github.com/tensorchord/envd/tree/main/examples)。
-:::
-
-然后可以运行下面的命令来建立一个新的环境：
-
-```
-cd envd-quick-start && envd up
-```
-
-```
-$ cd envd-quick-start && envd up
-[+] ⌚ parse build.envd and download/cache dependencies 2.8s ✅ (finished)
- => download oh-my-zsh                                                    2.8s
-[+] 🐋 build envd environment 18.3s (25/25) ✅ (finished)
- => create apt source dir                                                 0.0s
- => local://cache-dir                                                     0.1s
- => => transferring cache-dir: 5.12MB                                     0.1s
-...
- => pip install numpy                                                    13.0s
- => copy /oh-my-zsh /home/envd/.oh-my-zsh                                 0.1s
- => mkfile /home/envd/install.sh                                          0.0s
- => install oh-my-zsh                                                     0.1s
- => mkfile /home/envd/.zshrc                                              0.0s
- => install shell                                                         0.0s
- => install PyPI packages                                                 0.0s
- => merging all components into one                                       0.3s
- => => merging                                                            0.3s
- => mkfile /home/envd/.gitconfig                                          0.0s
- => exporting to oci image format                                         2.4s
- => => exporting layers                                                   2.0s
- => => exporting manifest sha256:7dbe9494d2a7a39af16d514b997a5a8f08b637f  0.0s
- => => exporting config sha256:1da06b907d53cf8a7312c138c3221e590dedc2717  0.0s
- => => sending tarball                                                    0.4s
-envd-quick-start via Py v3.9.13 via 🅒 envd
-⬢ [envd]❯ # You are in the container-based environment!
-```
-
-### 设置 Jupyter Notebook
-
-修改 `build.envd` 开启 Jupyter Notebook 支持：
-
-```python title=build.envd
-def build():
-    config.repo(url="https://github.com/tensorchord/envd", description="envd quick start example")
-    base(os="ubuntu20.04", language="python3")
-    # Configure pip index if needed.
-    # config.pip_index(url = "https://pypi.tuna.tsinghua.edu.cn/simple")
-    install.python_packages(name = [
-        "numpy",
-    ])
-    shell("zsh")
-    config.jupyter()
-```
-
-你可以通过 `envd envs ls` 获得正在运行的 Jupyter Notebook 的端口。
-
-```bash
-$ envd up --detach
-$ envd envs ls
-NAME                    JUPYTER                 SSH TARGET              CONTEXT                                 IMAGE                   GPU     CUDA    CUDNN   STATUS          CONTAINER ID
-envd-quick-start        http://localhost:42779   envd-quick-start.envd   /home/gaocegege/code/envd-quick-start   envd-quick-start:dev    false   <none>  <none>  Up 54 seconds   bd3f6a729e94
-```
-
-## 路线图 🗂️
-
-我们的路线图在这里 [ROADMAP](../community/roadmap)。
-
-## 为 `envd` 贡献 😊
-
-我们欢迎来自开源社区、个人和合作伙伴的各种贡献。
-
-- 加入我们的 [Discord 社区](https://discord.gg/KqswhpVgdU)!
-- 从源码构建可以阅读我们的[贡献指南](../community/contributing)和[开发教程](../developers/development).
-
-利用 Gitpod 来开发：[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/tensorchord/envd)
-
----
-
-**与我们交谈**
-
-💬 有兴趣和我们交流一下您在构建或管理 AI/ML 应用方面的经验吗？
-
-[**约个时间聊聊！**](https://forms.gle/9HDBHX5Y3fzuDCDAA)
+- 成本高：需要专业团队支持，无法规模化生产
+- 周期长：开发到上线以年为单位，难以快速响应企业专业需求
+- 精度低：依赖样本数据，泛化能力差，模型上线即巅峰
